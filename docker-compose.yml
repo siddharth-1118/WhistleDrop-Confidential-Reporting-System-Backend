@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  whistledrop-api:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      - DATABASE_URL=file:./whistledrop.db
+      - JWT_SECRET=whistledrop-production-jwt-secret-2026
+      - MODERATOR_INIT_USERNAME=admin
+      - MODERATOR_INIT_PASSWORD=adminpassword123
+    restart: always

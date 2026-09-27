@@ -1,0 +1,160 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "WhistleDrop API — Speak Without Being Seen",
+    "description": "Confidential Reporting System Backend API for GDG Recruitment 2026-27.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/reports": {
+      "post": {
+        "summary": "Submit an anonymous report",
+        "description": "Allows any user to anonymously submit a workplace or organization report. No user account, IP address, or identity tracking is recorded.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["category", "description"],
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": ["Security", "Harassment", "Corruption", "Technical", "Other"],
+                    "example": "Security"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Discovered unauthorized access logs on server cluster 3."
+                  },
+                  "evidenceUrl": {
+                    "type": "string",
+                    "example": "https://pastebin.com/raw/example"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report submitted successfully with unique case code."
+          },
+          "400": {
+            "description": "Validation error (invalid category or missing fields)."
+          }
+        }
+      }
+    },
+    "/reports/track/{caseCode}": {
+      "get": {
+        "summary": "Track report status anonymously",
+        "parameters": [
+          {
+            "name": "caseCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "WD-8K3P-9X2M"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report status and timeline of updates."
+          },
+          "404": {
+            "description": "Invalid case code."
+          }
+        }
+      }
+    },
+    "/moderators/login": {
+      "post": {
+        "summary": "Moderator login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": { "type": "string", "example": "admin" },
+                  "password": { "type": "string", "example": "adminpassword123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Returns JWT token." },
+          "401": { "description": "Invalid credentials." }
+        }
+      }
+    },
+    "/moderators/reports": {
+      "get": {
+        "summary": "List all reports (Moderator only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of reports." },
+          "401": { "description": "Unauthorized." }
+        }
+      }
+    },
+    "/moderators/reports/{id}/status": {
+      "patch": {
+        "summary": "Update report status & append status note",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status", "note"],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["SUBMITTED", "UNDER_REVIEW", "RESOLVED", "DISMISSED"],
+                    "example": "UNDER_REVIEW"
+                  },
+                  "note": { "type": "string", "example": "Assigning security team for verification." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Status updated successfully." },
+          "400": { "description": "Invalid status transition or missing fields." },
+          "401": { "description": "Unauthorized." }
+        }
+      }
+    }
+  }
+}

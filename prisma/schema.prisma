@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Report {
+  id            String         @id @default(uuid())
+  caseCode      String         @unique
+  category      String
+  description   String
+  evidenceUrl   String?
+  status        String         @default("SUBMITTED")
+  isClosed      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  statusUpdates StatusUpdate[]
+}
+
+model StatusUpdate {
+  id             String   @id @default(uuid())
+  reportId       String
+  report         Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  previousStatus String
+  newStatus      String
+  note           String
+  createdBy      String   @default("Moderator")
+  createdAt      DateTime @default(now())
+}
+
+model Moderator {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("MODERATOR")
+  createdAt    DateTime @default(now())
+}
