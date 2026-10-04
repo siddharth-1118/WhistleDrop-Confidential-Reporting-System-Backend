@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import reporterRoutes from './routes/reporter.routes';
 import moderatorRoutes from './routes/moderator.routes';
@@ -12,29 +13,22 @@ const app: Application = express();
 // Security and utility middleware
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allows Swagger UI to render inline styles/scripts
+    contentSecurityPolicy: false, // Allows Swagger UI and Tailwind CDN to render seamlessly
   })
 );
 app.use(cors());
 app.use(express.json());
 
+// Serve Static Frontend Files
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+
 // API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Root landing endpoint
+// Root landing endpoint serves the Single-Page Web App UI
 app.get('/', (_req, res) => {
-  res.status(200).json({
-    name: 'WhistleDrop Confidential Reporting API',
-    status: 'ONLINE',
-    documentation: '/api-docs',
-    health: '/health',
-    endpoints: {
-      submitReport: 'POST /api/v1/reports',
-      trackReport: 'GET /api/v1/reports/track/:caseCode',
-      moderatorLogin: 'POST /api/v1/moderators/login',
-      listReports: 'GET /api/v1/moderators/reports (Auth required)',
-    },
-  });
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 // API Routes
