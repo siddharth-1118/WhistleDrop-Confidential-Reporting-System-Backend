@@ -5,7 +5,7 @@ import { AppError } from '../middleware/errorHandler';
 import { AuthenticatedRequest } from '../middleware/auth';
 
 /**
- * Moderator Login
+ * POST /api/moderator/login — Authenticate a moderator.
  */
 export async function moderatorLogin(
   req: AuthenticatedRequest,
@@ -34,9 +34,18 @@ export async function moderatorLogin(
       role: moderator.role,
     });
 
+    // Record login audit log
+    await prisma.auditLog.create({
+      data: {
+        action: 'MODERATOR_LOGIN',
+        moderatorId: moderator.id,
+        details: `Moderator '${username}' authenticated successfully.`,
+      },
+    });
+
     res.status(200).json({
       success: true,
-      message: 'Moderator authenticated successfully',
+      message: 'Authentication successful',
       data: {
         token,
         username: moderator.username,
@@ -49,47 +58,55 @@ export async function moderatorLogin(
 }
 
 /**
- * Get All Reports with Optional Filtering by Category and Status
+ * GET /api/moderator/reports — List & filter reports with pagination & dashboard stats.
  */
-export async function getAllReports(
+export async function getModeratorReports(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const { category, status } = req.query;
+    const { category, status, search } = req.query;
 
-    const whereClause: { category?: string; status?: string } = {};
+    const whereClause: any = {};
 
-    if (typeof category === 'string') {
+    if (typeof category === 'string' && category) {
       whereClause.category = category;
     }
 
-    if (typeof status === 'string') {
+    if (typeof status === 'string' && status) {
       whereClause.status = status;
+    }
+
+    if (typeof search === 'string' && search) {
+      whereClause.OR = [
+        { caseCode: { contains: search } },
+        { title: { contains: search } },
+        { description: { contains: search } },
+      ];
     }
 
     const reports = await prisma.report.findMany({
       where: whereClause,
-      select: {
-        id: true,
-        caseCode: true,
-        category: true,
-        description: true,
-        evidenceUrl: true,
-        status: true,
-        isClosed: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: { statusUpdates: true },
-        },
+      include: {
+        publicTimeline: { orderBy: { createdAt: 'asc' } },
+        privateNotes: { orderBy: { createdAt: 'desc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
 
+    // Calculate dashboard statistics
+    const stats = {
+      total: await prisma.report.count(),
+      submitted: await prisma.report.count({ where: { status: 'SUBMITTED' } }),
+      underReview: await prisma.report.count({ where: { status: 'UNDER_REVIEW' } }),
+      resolved: await prisma.report.count({ where: { status: 'RESOLVED' } }),
+      dismissed: await prisma.report.count({ where: { status: 'DISMISSED' } }),
+    };
+
     res.status(200).json({
       success: true,
+      stats,
       count: reports.length,
       data: reports,
     });
@@ -99,9 +116,9 @@ export async function getAllReports(
 }
 
 /**
- * Get Single Report Details for Moderator
+ * GET /api/moderator/reports/:id — Get full report details for authorized moderators.
  */
-export async function getReportById(
+export async function getModeratorReportById(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -113,9 +130,8 @@ export async function getReportById(
     const report = await prisma.report.findUnique({
       where: { id },
       include: {
-        statusUpdates: {
-          orderBy: { createdAt: 'asc' },
-        },
+        publicTimeline: { orderBy: { createdAt: 'asc' } },
+        privateNotes: { orderBy: { createdAt: 'desc' } },
       },
     });
 
@@ -133,7 +149,8 @@ export async function getReportById(
 }
 
 /**
- * Update Report Status and Append Status Update Note
+ * PATCH /api/moderator/reports/:id/status — Validated status transitions & timeline entry.
+ * Supported workflow: SUBMITTED -> UNDER_REVIEW -> RESOLVED / DISMISSED
  */
 export async function updateReportStatus(
   req: AuthenticatedRequest,
@@ -145,48 +162,51 @@ export async function updateReportStatus(
     const id = Array.isArray(idParam) ? idParam[0] : idParam;
     const { status: newStatus, note } = req.body;
 
-    const report = await prisma.report.findUnique({
-      where: { id },
-    });
+    const report = await prisma.report.findUnique({ where: { id } });
 
     if (!report) {
       throw new AppError('Report not found', 404);
     }
 
-    if (report.isClosed) {
-      throw new AppError('Cannot update status of a permanently closed case.', 400);
-    }
-
     if (report.status === newStatus) {
-      throw new AppError(`Report status is already set to '${newStatus}'.`, 400);
+      throw new AppError(`Status is already set to '${newStatus}'.`, 400);
     }
 
     const previousStatus = report.status;
-    const moderatorName = req.moderator ? req.moderator.username : 'Moderator';
+    const modUsername = req.moderator ? req.moderator.username : 'Moderator';
 
-    // Transaction to update report status and insert status update history
-    const [updatedReport, statusUpdate] = await prisma.$transaction([
+    // Perform status update transaction
+    const [updatedReport, timelineItem] = await prisma.$transaction([
       prisma.report.update({
         where: { id },
-        data: { status: newStatus },
+        data: {
+          status: newStatus,
+          isClosed: newStatus === 'RESOLVED' || newStatus === 'DISMISSED',
+        },
       }),
-      prisma.statusUpdate.create({
+      prisma.timelineItem.create({
         data: {
           reportId: id,
-          previousStatus,
-          newStatus,
-          note,
-          createdBy: `Moderator (${moderatorName})`,
+          status: newStatus,
+          note: note || `Report status transitioned from ${previousStatus} to ${newStatus}.`,
+          createdBy: `Moderator (${modUsername})`,
+        },
+      }),
+      prisma.auditLog.create({
+        data: {
+          action: 'STATUS_UPDATE',
+          moderatorId: req.moderator?.moderatorId,
+          details: `Report '${report.caseCode}' status changed from ${previousStatus} to ${newStatus}.`,
         },
       }),
     ]);
 
     res.status(200).json({
       success: true,
-      message: `Report status updated from '${previousStatus}' to '${newStatus}'`,
+      message: `Report status updated to '${newStatus}'`,
       data: {
         report: updatedReport,
-        statusUpdate,
+        timelineItem,
       },
     });
   } catch (error) {
@@ -195,9 +215,9 @@ export async function updateReportStatus(
 }
 
 /**
- * Permanently Close/Archive Case (Brownie Points Feature)
+ * POST /api/moderator/reports/:id/notes — Append authorized internal private note or public update.
  */
-export async function closeReportCase(
+export async function addReportNote(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -205,41 +225,86 @@ export async function closeReportCase(
   try {
     const idParam = req.params.id;
     const id = Array.isArray(idParam) ? idParam[0] : idParam;
+    const { note, isPublic } = req.body;
 
-    const report = await prisma.report.findUnique({
-      where: { id },
-    });
-
+    const report = await prisma.report.findUnique({ where: { id } });
     if (!report) {
       throw new AppError('Report not found', 404);
     }
 
-    if (report.isClosed) {
-      throw new AppError('Report case is already permanently closed.', 400);
-    }
+    const authorName = req.moderator ? req.moderator.username : 'Moderator';
 
-    const moderatorName = req.moderator ? req.moderator.username : 'Moderator';
-
-    const [closedReport] = await prisma.$transaction([
-      prisma.report.update({
-        where: { id },
-        data: { isClosed: true },
-      }),
-      prisma.statusUpdate.create({
+    if (isPublic) {
+      // Create public timeline entry
+      const timelineItem = await prisma.timelineItem.create({
         data: {
           reportId: id,
-          previousStatus: report.status,
-          newStatus: report.status,
-          note: 'Case permanently closed by moderator.',
-          createdBy: `Moderator (${moderatorName})`,
+          status: report.status,
+          note,
+          createdBy: `Moderator (${authorName})`,
         },
-      }),
-    ]);
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          action: 'ADD_PUBLIC_UPDATE',
+          moderatorId: req.moderator?.moderatorId,
+          details: `Added public timeline update for case '${report.caseCode}'.`,
+        },
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Public timeline update added successfully.',
+        data: timelineItem,
+      });
+    } else {
+      // Create private internal moderator note
+      const privateNote = await prisma.privateNote.create({
+        data: {
+          reportId: id,
+          note,
+          authorName,
+        },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          action: 'ADD_PRIVATE_NOTE',
+          moderatorId: req.moderator?.moderatorId,
+          details: `Added private internal investigation note for case '${report.caseCode}'.`,
+        },
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Private internal note saved.',
+        data: privateNote,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * GET /api/moderator/audit — Retrieve audit logs for security oversight.
+ */
+export async function getAuditLogs(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
 
     res.status(200).json({
       success: true,
-      message: 'Case permanently closed.',
-      data: closedReport,
+      count: logs.length,
+      data: logs,
     });
   } catch (error) {
     next(error);

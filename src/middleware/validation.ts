@@ -2,13 +2,26 @@ import { Request, Response, NextFunction } from 'express';
 import { z, ZodError } from 'zod';
 
 export const createReportSchema = z.object({
-  category: z.enum(['Security', 'Harassment', 'Corruption', 'Technical', 'Other'], {
+  category: z.enum([
+    'Harassment',
+    'Security Breach',
+    'Corruption',
+    'Workplace Safety',
+    'Technical Misconduct',
+    'Other',
+  ], {
     errorMap: () => ({
-      message: 'Category must be one of: Security, Harassment, Corruption, Technical, Other',
+      message: 'Category must be one of: Harassment, Security Breach, Corruption, Workplace Safety, Technical Misconduct, Other',
     }),
   }),
+  title: z.string().max(200, 'Title cannot exceed 200 characters').optional().or(z.literal('')),
   description: z.string().min(10, 'Description must be at least 10 characters long').max(5000, 'Description cannot exceed 5000 characters'),
-  evidenceUrl: z.string().url('Evidence URL must be a valid URL').optional().or(z.literal('')),
+  incidentDate: z.string().optional().or(z.literal('')),
+  department: z.string().max(100, 'Department cannot exceed 100 characters').optional().or(z.literal('')),
+});
+
+export const lookupReportSchema = z.object({
+  caseCode: z.string().min(5, 'Case code is required'),
 });
 
 export const updateStatusSchema = z.object({
@@ -17,7 +30,12 @@ export const updateStatusSchema = z.object({
       message: 'Status must be one of: SUBMITTED, UNDER_REVIEW, RESOLVED, DISMISSED',
     }),
   }),
-  note: z.string().min(3, 'Status update note must be at least 3 characters long').max(1000, 'Status update note cannot exceed 1000 characters'),
+  note: z.string().min(3, 'Status update note must be at least 3 characters long').max(1000),
+});
+
+export const addNoteSchema = z.object({
+  note: z.string().min(3, 'Note text must be at least 3 characters long').max(2000),
+  isPublic: z.boolean().optional().default(false),
 });
 
 export const loginSchema = z.object({

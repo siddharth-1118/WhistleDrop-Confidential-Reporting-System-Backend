@@ -8,27 +8,38 @@ datasource db {
 }
 
 model Report {
-  id            String         @id @default(uuid())
-  caseCode      String         @unique
-  category      String
-  description   String
-  evidenceUrl   String?
-  status        String         @default("SUBMITTED")
-  isClosed      Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  statusUpdates StatusUpdate[]
+  id             String         @id @default(uuid())
+  caseCode       String         @unique
+  category       String
+  title          String?
+  description    String
+  incidentDate   String?
+  department     String?
+  status         String         @default("SUBMITTED")
+  isClosed       Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  publicTimeline TimelineItem[]
+  privateNotes   PrivateNote[]
 }
 
-model StatusUpdate {
-  id             String   @id @default(uuid())
-  reportId       String
-  report         Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  previousStatus String
-  newStatus      String
-  note           String
-  createdBy      String   @default("Moderator")
-  createdAt      DateTime @default(now())
+model TimelineItem {
+  id        String   @id @default(uuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  status    String
+  note      String
+  createdBy String   @default("System")
+  createdAt DateTime @default(now())
+}
+
+model PrivateNote {
+  id         String   @id @default(uuid())
+  reportId   String
+  report     Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  note       String
+  authorName String   @default("Moderator")
+  createdAt  DateTime @default(now())
 }
 
 model Moderator {
@@ -37,4 +48,12 @@ model Moderator {
   passwordHash String
   role         String   @default("MODERATOR")
   createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  moderatorId String?
+  details     String?
+  createdAt   DateTime @default(now())
 }

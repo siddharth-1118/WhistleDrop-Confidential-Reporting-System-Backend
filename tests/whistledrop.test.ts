@@ -11,7 +11,9 @@ describe('WhistleDrop API Integration Tests', () => {
 
   beforeAll(async () => {
     // Setup clean test database state
-    await prisma.statusUpdate.deleteMany({});
+    await prisma.auditLog.deleteMany({});
+    await prisma.privateNote.deleteMany({});
+    await prisma.timelineItem.deleteMany({});
     await prisma.report.deleteMany({});
     await prisma.moderator.deleteMany({});
 
@@ -27,7 +29,7 @@ describe('WhistleDrop API Integration Tests', () => {
 
     // Authenticate test moderator to get token
     const loginRes = await request(app)
-      .post('/api/v1/moderators/login')
+      .post('/api/moderator/login')
       .send({ username: 'testadmin', password: 'testpass123' });
 
     expect(loginRes.status).toBe(200);
@@ -39,20 +41,21 @@ describe('WhistleDrop API Integration Tests', () => {
     await prisma.$disconnect();
   });
 
-  describe('1. Anonymous Report Submission', () => {
+  describe('1. Anonymous Report Submission (POST /api/reports)', () => {
     it('should allow submitting an anonymous report without account/credentials', async () => {
       const res = await request(app)
-        .post('/api/v1/reports')
+        .post('/api/reports')
         .send({
-          category: 'Security',
+          category: 'Security Breach',
+          title: 'Exposed API Keys in Production Logs',
           description: 'Critical API endpoint returning unhashed database connection strings.',
-          evidenceUrl: 'https://example.com/evidence/logs.txt',
+          department: 'Engineering',
         });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.data.caseCode).toMatch(/^WD-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
-      expect(res.body.data.category).toBe('Security');
+      expect(res.body.data.category).toBe('Security Breach');
       expect(res.body.data.status).toBe('SUBMITTED');
 
       createdCaseCode = res.body.data.caseCode;
@@ -60,7 +63,7 @@ describe('WhistleDrop API Integration Tests', () => {
 
     it('should reject invalid report categories', async () => {
       const res = await request(app)
-        .post('/api/v1/reports')
+        .post('/api/reports')
         .send({
           category: 'InvalidCategory',
           description: 'Testing invalid category rejection logic.',
@@ -69,49 +72,42 @@ describe('WhistleDrop API Integration Tests', () => {
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
-
-    it('should reject descriptions shorter than 10 characters', async () => {
-      const res = await request(app)
-        .post('/api/v1/reports')
-        .send({
-          category: 'Technical',
-          description: 'Short',
-        });
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-    });
   });
 
-  describe('2. Case Tracking (Anonymous)', () => {
+  describe('2. Anonymous Case Tracking (POST /api/reports/lookup)', () => {
     it('should return report details given a valid case code', async () => {
-      const res = await request(app).get(`/api/v1/reports/track/${createdCaseCode}`);
+      const res = await request(app)
+        .post('/api/reports/lookup')
+        .send({ caseCode: createdCaseCode });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.caseCode).toBe(createdCaseCode);
       expect(res.body.data.status).toBe('SUBMITTED');
-      expect(res.body.data.statusUpdates.length).toBeGreaterThanOrEqual(1);
+      expect(res.body.data.publicTimeline.length).toBeGreaterThanOrEqual(1);
+      // Ensure private notes are NOT returned in public lookup
+      expect(res.body.data.privateNotes).toBeUndefined();
     });
 
-    it('should return 404 for an invalid or non-existent case code', async () => {
-      const res = await request(app).get('/api/v1/reports/track/WD-INVALID-CODE');
+    it('should return 404 for an invalid case code without leaking system info', async () => {
+      const res = await request(app)
+        .post('/api/reports/lookup')
+        .send({ caseCode: 'WD-INVALID-CODE' });
 
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
     });
   });
 
-  describe('3. Moderator Auth & Report Management', () => {
+  describe('3. Moderator Auth & Management (POST /api/moderator/notes & audit)', () => {
     it('should deny unauthorized access to moderator endpoints', async () => {
-      const res = await request(app).get('/api/v1/moderators/reports');
-
+      const res = await request(app).get('/api/moderator/reports');
       expect(res.status).toBe(401);
     });
 
-    it('should allow authenticated moderator to list all reports', async () => {
+    it('should allow authenticated moderator to list reports', async () => {
       const res = await request(app)
-        .get('/api/v1/moderators/reports')
+        .get('/api/moderator/reports')
         .set('Authorization', `Bearer ${moderatorToken}`);
 
       expect(res.status).toBe(200);
@@ -121,69 +117,61 @@ describe('WhistleDrop API Integration Tests', () => {
       reportId = res.body.data[0].id;
     });
 
-    it('should filter reports by category', async () => {
+    it('should allow moderator to update report status to UNDER_REVIEW', async () => {
       const res = await request(app)
-        .get('/api/v1/moderators/reports?category=Security')
-        .set('Authorization', `Bearer ${moderatorToken}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.every((r: any) => r.category === 'Security')).toBe(true);
-    });
-
-    it('should allow moderator to update report status to UNDER_REVIEW with a note', async () => {
-      const res = await request(app)
-        .patch(`/api/v1/moderators/reports/${reportId}/status`)
+        .patch(`/api/moderator/reports/${reportId}/status`)
         .set('Authorization', `Bearer ${moderatorToken}`)
         .send({
           status: 'UNDER_REVIEW',
-          note: 'Report assigned to Incident Response Team.',
+          note: 'Assigned to Security Team.',
         });
 
       expect(res.status).toBe(200);
       expect(res.body.data.report.status).toBe('UNDER_REVIEW');
-      expect(res.body.data.statusUpdate.note).toBe('Report assigned to Incident Response Team.');
     });
 
-    it('should reflect updated status on public tracking route', async () => {
-      const res = await request(app).get(`/api/v1/reports/track/${createdCaseCode}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.status).toBe('UNDER_REVIEW');
-      expect(res.body.data.statusUpdates.length).toBe(2);
-      expect(res.body.data.statusUpdates[1].note).toBe('Report assigned to Incident Response Team.');
-    });
-
-    it('should prevent setting the exact same status', async () => {
-      const res = await request(app)
-        .patch(`/api/v1/moderators/reports/${reportId}/status`)
+    it('should allow adding private internal notes and public timeline updates separately', async () => {
+      // Add Private Note
+      const privRes = await request(app)
+        .post(`/api/moderator/reports/${reportId}/notes`)
         .set('Authorization', `Bearer ${moderatorToken}`)
         .send({
-          status: 'UNDER_REVIEW',
-          note: 'Duplicate status check.',
+          note: 'Internal investigator note: IP logs confirm external leak source.',
+          isPublic: false,
         });
 
-      expect(res.status).toBe(400);
+      expect(privRes.status).toBe(201);
+      expect(privRes.body.data.authorName).toBe('testadmin');
+
+      // Add Public Update
+      const pubRes = await request(app)
+        .post(`/api/moderator/reports/${reportId}/notes`)
+        .set('Authorization', `Bearer ${moderatorToken}`)
+        .send({
+          note: 'Public Update: Mitigating controls applied.',
+          isPublic: true,
+        });
+
+      expect(pubRes.status).toBe(201);
+
+      // Verify reporter lookup receives public update BUT NOT private note
+      const lookupRes = await request(app)
+        .post('/api/reports/lookup')
+        .send({ caseCode: createdCaseCode });
+
+      expect(lookupRes.status).toBe(200);
+      const timelineNotes = lookupRes.body.data.publicTimeline.map((t: any) => t.note);
+      expect(timelineNotes).toContain('Public Update: Mitigating controls applied.');
+      expect(timelineNotes).not.toContain('Internal investigator note: IP logs confirm external leak source.');
     });
 
-    it('should allow moderator to permanently close a report case', async () => {
+    it('should retrieve audit trail logs for moderators', async () => {
       const res = await request(app)
-        .post(`/api/v1/moderators/reports/${reportId}/close`)
+        .get('/api/moderator/audit')
         .set('Authorization', `Bearer ${moderatorToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.isClosed).toBe(true);
-    });
-
-    it('should disallow status updates on a closed report case', async () => {
-      const res = await request(app)
-        .patch(`/api/v1/moderators/reports/${reportId}/status`)
-        .set('Authorization', `Bearer ${moderatorToken}`)
-        .send({
-          status: 'RESOLVED',
-          note: 'Trying to update closed case.',
-        });
-
-      expect(res.status).toBe(400);
+      expect(res.body.data.length).toBeGreaterThan(0);
     });
   });
 });

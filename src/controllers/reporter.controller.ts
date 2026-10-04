@@ -4,8 +4,8 @@ import { generateCaseCode } from '../utils/security';
 import { AppError } from '../middleware/errorHandler';
 
 /**
- * Anonymous Report Submission
- * ZERO reporter PII (IP address, user agent, etc.) is recorded or saved.
+ * POST /api/reports — Submit an anonymous report.
+ * ZERO reporter PII (IP address, user agent, headers) is logged or stored.
  */
 export async function submitReport(
   req: Request,
@@ -13,10 +13,9 @@ export async function submitReport(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { category, description, evidenceUrl } = req.body;
+    const { category, title, description, incidentDate, department } = req.body;
 
     let caseCode = generateCaseCode();
-    // Ensure uniqueness
     let attempts = 0;
     while (attempts < 5) {
       const existing = await prisma.report.findUnique({ where: { caseCode } });
@@ -29,29 +28,31 @@ export async function submitReport(
       data: {
         caseCode,
         category,
+        title: title || null,
         description,
-        evidenceUrl: evidenceUrl || null,
+        incidentDate: incidentDate || null,
+        department: department || null,
         status: 'SUBMITTED',
-        statusUpdates: {
+        publicTimeline: {
           create: {
-            previousStatus: 'NONE',
-            newStatus: 'SUBMITTED',
-            note: 'Report successfully submitted anonymously to WhistleDrop system.',
+            status: 'SUBMITTED',
+            note: 'Report received and assigned for security evaluation.',
             createdBy: 'System',
           },
         },
       },
       include: {
-        statusUpdates: true,
+        publicTimeline: true,
       },
     });
 
     res.status(201).json({
       success: true,
-      message: 'Report submitted successfully. Please store your case code safely to track progress anonymously.',
+      message: 'Your report has been received.',
       data: {
         caseCode: report.caseCode,
         category: report.category,
+        title: report.title,
         status: report.status,
         createdAt: report.createdAt,
       },
@@ -62,20 +63,19 @@ export async function submitReport(
 }
 
 /**
- * Public Case Tracking
- * Allows reporter to check report progress using their secure case code.
+ * POST /api/reports/lookup — Access a report using case code in request body.
+ * STRICT SECURITY GUARANTEE: Returns ONLY public timeline items; NEVER exposes private moderator notes.
  */
-export async function trackReport(
+export async function lookupReport(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const caseCodeRaw = req.params.caseCode;
-    const caseCode = Array.isArray(caseCodeRaw) ? caseCodeRaw[0] : caseCodeRaw;
+    const { caseCode } = req.body;
 
-    if (!caseCode) {
-      throw new AppError('Case code is required', 400);
+    if (!caseCode || typeof caseCode !== 'string') {
+      throw new AppError('Case code is required in request body.', 400);
     }
 
     const report = await prisma.report.findUnique({
@@ -83,13 +83,18 @@ export async function trackReport(
       select: {
         caseCode: true,
         category: true,
+        title: true,
+        description: true,
+        incidentDate: true,
+        department: true,
         status: true,
         isClosed: true,
         createdAt: true,
         updatedAt: true,
-        statusUpdates: {
+        publicTimeline: {
           select: {
-            newStatus: true,
+            id: true,
+            status: true,
             note: true,
             createdAt: true,
           },
@@ -99,7 +104,51 @@ export async function trackReport(
     });
 
     if (!report) {
-      throw new AppError('No report found with the provided case code. Please check the code and try again.', 404);
+      // Generic error response to prevent case code discovery/enumeration
+      throw new AppError('Invalid case code or report unavailable. Please verify your code.', 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * GET /api/reports/:id/timeline — Retrieve public investigation timeline information.
+ */
+export async function getReportTimeline(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const idParam = req.params.id;
+    const reportId = Array.isArray(idParam) ? idParam[0] : idParam;
+
+    const report = await prisma.report.findUnique({
+      where: { id: reportId },
+      select: {
+        caseCode: true,
+        status: true,
+        createdAt: true,
+        publicTimeline: {
+          select: {
+            id: true,
+            status: true,
+            note: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!report) {
+      throw new AppError('Report not found', 404);
     }
 
     res.status(200).json({

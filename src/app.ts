@@ -13,11 +13,11 @@ const app: Application = express();
 // Security and utility middleware
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allows Swagger UI and Tailwind CDN to render seamlessly
+    contentSecurityPolicy: false,
   })
 );
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Serve Static Frontend Files
 const publicPath = path.join(__dirname, '../public');
@@ -26,14 +26,17 @@ app.use(express.static(publicPath));
 // API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Standard API Endpoints (/api & /api/v1 compatibility)
+app.use('/api', reporterRoutes);
+app.use('/api/v1', reporterRoutes);
+
+app.use('/api/moderator', moderatorRoutes);
+app.use('/api/v1/moderators', moderatorRoutes);
+
 // Root landing endpoint serves the Single-Page Web App UI
 app.get('/', (_req, res) => {
   res.sendFile(path.join(publicPath, 'index.html'));
 });
-
-// API Routes
-app.use('/api/v1', reporterRoutes);
-app.use('/api/v1/moderators', moderatorRoutes);
 
 // Health check endpoint
 app.get('/health', (_req, res) => {
