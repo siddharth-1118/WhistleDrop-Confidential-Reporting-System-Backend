@@ -4,84 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WhistleDrop — Speak Without Being Seen</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --bg: #030712;
-      --surface: #0d1117;
-      --border: #1e2a3a;
-      --accent: #00f5d4;
-      --accent2: #7c3aed;
-      --danger: #f43f5e;
-      --warning: #f59e0b;
-      --text: #e2e8f0;
-      --muted: #475569;
+      --bg: #090c12;
+      --card-bg: #121722;
+      --card-border: #1e2638;
+      --input-bg: #0d111a;
+      --text-main: #f1f5f9;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --coral: #ff6f59;
+      --coral-hover: #ff573e;
+      --emerald: #10b981;
+      --emerald-hover: #059669;
+      --purple: #8b5cf6;
+      --purple-hover: #7c3aed;
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
     }
 
-    /* Animated Grid Background */
-    body::before {
-      content: '';
+    /* Ambient Background Illumination */
+    .ambient-glow {
       position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0, 245, 212, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 245, 212, 0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
+      top: 0;
+      right: 0;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle at 70% 30%, rgba(255, 111, 89, 0.08) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Radial Glow */
-    body::after {
-      content: '';
+    .ambient-purple-glow {
       position: fixed;
-      top: -30%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 800px;
-      height: 800px;
-      background: radial-gradient(ellipse, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+      bottom: 0;
+      left: 0;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle at 30% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Noise Overlay */
-    .noise {
-      position: fixed;
-      inset: 0;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* NAV */
-    .nav {
+    /* TOP HEADER NAV */
+    header {
       position: sticky;
       top: 0;
       z-index: 100;
-      padding: 16px 24px;
+      background: rgba(9, 12, 18, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 18px 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      border-bottom: 1px solid var(--border);
-      background: rgba(3, 7, 18, 0.85);
-      backdrop-filter: blur(20px);
     }
 
-    .logo {
+    .brand {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -89,1557 +85,1338 @@
       text-decoration: none;
     }
 
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--accent);
-      border-radius: 10px;
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255,111,89,0.2), rgba(255,111,89,0.05));
+      border: 1px solid rgba(255,111,89,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 16px rgba(0, 245, 212, 0.2);
+      color: var(--coral);
+      font-size: 18px;
     }
 
-    .logo-icon svg {
-      width: 22px;
-      height: 22px;
-      stroke: var(--accent);
-      fill: none;
-    }
-
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .logo-name {
-      font-size: 17px;
-      font-weight: 700;
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
       letter-spacing: -0.5px;
-      color: white;
+      color: #ffffff;
     }
 
-    .logo-tag {
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    /* Pill Nav */
-    .pill-nav {
+    .nav-tabs {
       display: flex;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 4px;
-      gap: 2px;
+      align-items: center;
+      gap: 24px;
     }
 
-    .pill-btn {
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
+    .nav-tab {
       background: transparent;
-      color: var(--muted);
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-sub);
+      cursor: pointer;
+      padding: 8px 4px;
+      position: relative;
       transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      white-space: nowrap;
     }
 
-    .pill-btn:hover { color: var(--text); }
+    .nav-tab:hover { color: var(--text-main); }
 
-    .pill-btn.active {
-      background: rgba(0, 245, 212, 0.1);
-      color: var(--accent);
-      box-shadow: inset 0 0 0 1px rgba(0, 245, 212, 0.25);
+    .nav-tab.active {
+      color: var(--coral);
+      font-weight: 600;
     }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .nav-link {
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-      letter-spacing: 0.5px;
-    }
-
-    .nav-link:hover { color: var(--accent); }
-
-    /* Status Indicator */
-    .status-dot {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      color: #22c55e;
-      letter-spacing: 0.5px;
-    }
-
-    .status-dot::before {
+    .nav-tab.active::after {
       content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 6px #22c55e;
-      animation: pulse-green 2s infinite;
+      position: absolute;
+      bottom: -19px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--coral);
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 0 12px rgba(255, 111, 89, 0.6);
     }
 
-    @keyframes pulse-green {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+    .mod-portal-link {
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      transition: all 0.2s;
     }
 
-    /* MAIN LAYOUT */
-    .main {
+    .mod-portal-link:hover {
+      border-color: var(--purple);
+      color: var(--purple);
+    }
+
+    /* MAIN CONTENT WRAPPER */
+    main {
       position: relative;
       z-index: 1;
-      max-width: 860px;
+      max-width: 1240px;
       margin: 0 auto;
       padding: 48px 24px 80px;
+      width: 100%;
+      flex: 1;
     }
 
-    /* HERO SECTION */
-    .hero {
-      text-align: center;
-      margin-bottom: 48px;
+    /* VIEW PANES */
+    .view-pane { display: none; }
+    .view-pane.active { display: block; }
+
+    /* --- SCREEN 1 & 2: REPORT SUBMIT VIEW --- */
+    .submit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
     }
 
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 20px;
-      padding: 6px 14px;
-      border: 1px solid rgba(0, 245, 212, 0.2);
-      border-radius: 100px;
-      background: rgba(0, 245, 212, 0.05);
+    .hero-text {
+      padding-top: 16px;
     }
 
-    .hero-title {
-      font-size: clamp(32px, 6vw, 52px);
-      font-weight: 700;
-      letter-spacing: -2px;
+    .hero-headline {
+      font-size: clamp(38px, 4.5vw, 56px);
+      font-weight: 800;
       line-height: 1.1;
-      color: white;
-      margin-bottom: 16px;
+      letter-spacing: -1.5px;
+      color: #ffffff;
+      margin-bottom: 20px;
     }
 
-    .hero-title span {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    .hero-headline span {
+      background: linear-gradient(135deg, var(--coral), #ffa38f);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .hero-sub {
-      font-size: 15px;
-      color: var(--muted);
-      max-width: 480px;
-      margin: 0 auto;
+    .hero-description {
+      font-size: 16px;
+      color: var(--text-sub);
       line-height: 1.7;
+      margin-bottom: 40px;
+      max-width: 480px;
     }
 
-    /* CARD */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.3), transparent);
-    }
-
-    .card-body {
-      padding: 32px;
-    }
-
-    /* Section Label */
-    .section-label {
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 24px;
+    .feature-list {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      gap: 24px;
     }
 
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* FORM ELEMENTS */
-    .field { margin-bottom: 20px; }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: #94a3b8;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 13px 16px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
-      color: var(--text);
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: rgba(0, 245, 212, 0.4);
-      box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.08);
-    }
-
-    .field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
-
-    .field select option { background: #0d1117; }
-
-    /* Privacy Banner */
-    .privacy-banner {
+    .feature-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 14px 16px;
-      background: rgba(0, 245, 212, 0.05);
-      border: 1px solid rgba(0, 245, 212, 0.15);
-      border-radius: 12px;
-      margin-bottom: 24px;
+      gap: 16px;
     }
 
-    .privacy-icon {
-      flex-shrink: 0;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(0, 245, 212, 0.1);
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
 
-    .privacy-icon svg {
-      width: 16px;
-      height: 16px;
-      stroke: var(--accent);
-      fill: none;
+    .icon-coral { background: rgba(255, 111, 89, 0.12); color: var(--coral); border: 1px solid rgba(255, 111, 89, 0.2); }
+    .icon-purple { background: rgba(139, 92, 246, 0.12); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.2); }
+    .icon-emerald { background: rgba(16, 185, 129, 0.12); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    .feature-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 3px;
     }
 
-    .privacy-text {
-      font-size: 12px;
-      color: #64748b;
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* CARD FORM */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .card-header-tag {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--coral);
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .has-icon { padding-left: 44px; }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(255, 111, 89, 0.15);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
       line-height: 1.6;
     }
 
-    .privacy-text strong { color: var(--accent); font-weight: 600; }
+    .form-select option { background: var(--card-bg); color: var(--text-main); }
 
-    /* BTN PRIMARY */
-    .btn-primary {
+    .btn-coral {
       width: 100%;
-      padding: 15px 24px;
-      background: linear-gradient(135deg, var(--accent), #00c4a7);
+      padding: 16px;
+      background: linear-gradient(135deg, var(--coral), #ff573e);
       border: none;
-      border-radius: 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
       font-weight: 700;
-      color: #030712;
+      color: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      letter-spacing: 0.3px;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: white;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .btn-primary:hover::before { opacity: 0.08; }
-    .btn-primary:active { transform: scale(0.99); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-primary svg {
-      width: 18px;
-      height: 18px;
-      stroke: #030712;
-      fill: none;
-    }
-
-    /* BTN SECONDARY */
-    .btn-secondary {
-      padding: 11px 20px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(255, 111, 89, 0.35);
       transition: all 0.2s;
     }
 
-    .btn-secondary:hover {
-      border-color: rgba(0, 245, 212, 0.3);
-      color: var(--accent);
+    .btn-coral:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(255, 111, 89, 0.45);
     }
 
-    /* SUCCESS STATE */
-    .success-state {
+    .card-footer-privacy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* SCREEN 2: SUCCESS CARD OVERLAY / STATE */
+    .success-card {
+      max-width: 540px;
+      margin: 40px auto 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 44px 36px;
       text-align: center;
-      padding: 40px 32px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
       display: none;
     }
 
-    .success-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 20px;
-      background: rgba(0, 245, 212, 0.1);
-      border: 1px solid rgba(0, 245, 212, 0.3);
+    .success-badge-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.15);
+      border: 2px solid var(--emerald);
+      color: var(--emerald);
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 32px;
       margin: 0 auto 24px;
-      box-shadow: 0 0 32px rgba(0, 245, 212, 0.15);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.3);
     }
 
-    .success-icon svg {
-      width: 32px;
-      height: 32px;
-      stroke: var(--accent);
-      fill: none;
-      stroke-width: 1.5;
+    .success-heading {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
     }
 
-    .case-code-box {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(0, 245, 212, 0.2);
-      border-radius: 16px;
-      padding: 28px;
-      margin: 24px 0;
-      position: relative;
-      overflow: hidden;
+    .success-heading span { color: var(--emerald); }
+
+    .success-subtext {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.6;
+      margin-bottom: 28px;
     }
 
-    .case-code-box::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(0, 245, 212, 0.04) 0%, transparent 70%);
-    }
-
-    .case-code-label {
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-
-    .case-code-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(22px, 5vw, 36px);
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 4px;
-      text-shadow: 0 0 20px rgba(0, 245, 212, 0.4);
-      margin-bottom: 16px;
-    }
-
-    .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 20px;
-      background: rgba(0, 245, 212, 0.1);
-      border: 1px solid rgba(0, 245, 212, 0.25);
-      border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.5px;
-    }
-
-    .copy-btn:hover {
-      background: rgba(0, 245, 212, 0.15);
-    }
-
-    .copy-btn svg {
-      width: 14px;
-      height: 14px;
-      stroke: currentColor;
-      fill: none;
-    }
-
-    .warn-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--warning);
-      margin-top: 12px;
-      letter-spacing: 0.5px;
-    }
-
-    .warn-chip svg {
-      width: 14px;
-      height: 14px;
-      stroke: currentColor;
-      fill: none;
-      flex-shrink: 0;
-    }
-
-    .success-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .success-actions button {
-      flex: 1;
-    }
-
-    /* TRACKING */
-    .track-input-row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .mono-input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 18px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .mono-input:focus {
-      border-color: rgba(0, 245, 212, 0.4);
-      box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.08);
-    }
-
-    .mono-input::placeholder { color: #334155; letter-spacing: 1px; }
-
-    .btn-track {
-      padding: 14px 24px;
-      background: rgba(0, 245, 212, 0.1);
-      border: 1px solid rgba(0, 245, 212, 0.3);
-      border-radius: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-track svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-    }
-
-    .btn-track:hover {
-      background: rgba(0, 245, 212, 0.18);
-    }
-
-    /* Timeline */
-    .timeline { margin-top: 32px; }
-
-    .report-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
+    .case-code-container {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 24px;
       margin-bottom: 24px;
     }
 
-    .report-code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 2px;
-    }
-
-    .report-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .chip {
-      padding: 4px 12px;
-      border-radius: 100px;
+    .case-code-label {
       font-size: 11px;
       font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .chip-category {
-      background: rgba(124, 58, 237, 0.15);
-      color: #a78bfa;
-      border: 1px solid rgba(124, 58, 237, 0.25);
-    }
-
-    .chip-SUBMITTED {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.25);
-    }
-
-    .chip-UNDER_REVIEW {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.25);
-    }
-
-    .chip-RESOLVED {
-      background: rgba(0, 245, 212, 0.1);
-      color: var(--accent);
-      border: 1px solid rgba(0, 245, 212, 0.2);
-    }
-
-    .chip-DISMISSED {
-      background: rgba(71, 85, 105, 0.3);
-      color: #64748b;
-      border: 1px solid rgba(71, 85, 105, 0.3);
-    }
-
-    .timeline-label {
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 3px;
+      color: var(--text-muted);
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 20px;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
     }
 
-    .timeline-list {
-      position: relative;
-      padding-left: 24px;
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .tl-item {
-      position: relative;
-    }
-
-    .tl-item::before {
-      content: '';
-      position: absolute;
-      left: -29px;
-      top: 8px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
-      border: 2px solid var(--bg);
-    }
-
-    .tl-item:first-child::before { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
-    .tl-item:last-child::before { background: var(--accent2); box-shadow: 0 0 8px rgba(124, 58, 237, 0.5); }
-
-    .tl-card {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 18px;
-    }
-
-    .tl-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      gap: 8px;
-    }
-
-    .tl-status {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 1px;
-    }
-
-    .tl-time {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-    }
-
-    .tl-note {
-      font-size: 13px;
-      color: #94a3b8;
-      line-height: 1.6;
-    }
-
-    /* MODERATOR */
-    .mod-login-wrap {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .mod-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .shield-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(124, 58, 237, 0.1);
-      border: 1px solid rgba(124, 58, 237, 0.25);
+    .case-code-display {
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      gap: 16px;
     }
 
-    .shield-icon svg {
-      width: 24px;
-      height: 24px;
-      stroke: var(--accent2);
-      fill: none;
+    .case-code-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 30px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 3px;
+    }
+
+    .btn-copy {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-main);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: rgba(255,255,255,0.15);
+      color: var(--emerald);
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .info-box-icon { color: var(--blue); font-size: 16px; margin-top: 2px; }
+
+    .info-box-bullets {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    .btn-emerald {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--emerald), #059669);
+      border: none;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-emerald:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(16, 185, 129, 0.45);
+    }
+
+    /* --- SCREEN 3: TRACK YOUR CASE VIEW --- */
+    .track-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 56px;
+      align-items: start;
+    }
+
+    .hero-headline-purple span {
+      background: linear-gradient(135deg, var(--purple), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .btn-purple {
       width: 100%;
-      padding: 15px 24px;
-      background: linear-gradient(135deg, var(--accent2), #5b21b6);
+      padding: 16px;
+      background: linear-gradient(135deg, var(--purple), #7c3aed);
       border: none;
-      border-radius: 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
       font-weight: 700;
-      color: white;
+      color: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.35);
       transition: all 0.2s;
     }
 
-    .btn-purple:hover { opacity: 0.9; }
-
-    .btn-purple svg {
-      width: 18px;
-      height: 18px;
-      stroke: white;
-      fill: none;
+    .btn-purple:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(139, 92, 246, 0.45);
     }
 
-    /* MOD DASHBOARD */
-    .mod-top-bar {
+    /* TIMELINE CARD */
+    .timeline-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .timeline-header {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 14px 20px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
     }
 
-    .mod-user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .mod-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(124, 58, 237, 0.2);
-      border: 1px solid rgba(124, 58, 237, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent2);
+    .timeline-case-title {
       font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
     }
 
-    .btn-logout {
-      padding: 7px 14px;
-      background: transparent;
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      border-radius: 8px;
+    .timeline-case-date {
       font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--danger);
-      cursor: pointer;
-      transition: all 0.2s;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
-    .btn-logout:hover { background: rgba(244, 63, 94, 0.1); }
-
-    /* FILTERS */
-    .filter-bar {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .filter-bar select {
-      flex: 1;
-      min-width: 160px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      cursor: pointer;
-      -webkit-appearance: none;
-      transition: border-color 0.2s;
-    }
-
-    .filter-bar select:focus { border-color: rgba(0, 245, 212, 0.3); }
-
-    /* MOD REPORT CARD */
-    .mod-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 16px;
-      position: relative;
-      transition: border-color 0.2s;
-    }
-
-    .mod-card:hover { border-color: rgba(0, 245, 212, 0.15); }
-
-    .mod-card-header {
-      display: flex;
-      flex-wrap: wrap;
+    /* BADGES */
+    .badge {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .mod-card-code {
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 11px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
       font-weight: 700;
-      color: var(--accent);
       letter-spacing: 1px;
     }
 
-    .mod-card-body {
-      padding: 16px 20px;
+    .badge-SUBMITTED { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-UNDER_REVIEW { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-RESOLVED { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-DISMISSED { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    /* TIMELINE FLOW */
+    .timeline-flow {
+      position: relative;
+      padding-left: 28px;
     }
 
-    .mod-card-desc {
-      font-size: 14px;
-      color: #94a3b8;
-      line-height: 1.6;
-      margin-bottom: 12px;
+    .timeline-flow::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--card-border);
     }
 
-    .evidence-link {
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--accent);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 16px;
+    .timeline-step {
+      position: relative;
+      margin-bottom: 28px;
     }
 
-    .evidence-link svg {
-      width: 12px;
-      height: 12px;
-      stroke: currentColor;
-      fill: none;
+    .timeline-step:last-child { margin-bottom: 0; }
+
+    .step-node {
+      position: absolute;
+      left: -28px;
+      top: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 3px solid var(--purple);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
     }
 
-    .update-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
+    .timeline-step.completed .step-node {
+      border-color: var(--emerald);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
     }
 
-    .update-controls select,
-    .update-controls input {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 12px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .update-controls select { min-width: 140px; }
-    .update-controls input { flex: 1; min-width: 160px; }
-
-    .update-controls select:focus,
-    .update-controls input:focus { border-color: rgba(0, 245, 212, 0.3); }
-
-    .btn-update {
-      padding: 9px 18px;
-      background: rgba(0, 245, 212, 0.1);
-      border: 1px solid rgba(0, 245, 212, 0.2);
-      border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .btn-update:hover { background: rgba(0, 245, 212, 0.15); }
-
-    .btn-close-case {
-      padding: 9px 18px;
-      background: rgba(244, 63, 94, 0.08);
-      border: 1px solid rgba(244, 63, 94, 0.2);
-      border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--danger);
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .btn-close-case:hover { background: rgba(244, 63, 94, 0.15); }
-
-    .closed-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--danger);
-      padding: 4px 10px;
-      background: rgba(244, 63, 94, 0.08);
-      border: 1px solid rgba(244, 63, 94, 0.15);
-      border-radius: 100px;
-    }
-
-    /* EMPTY STATE */
-    .empty-state {
-      text-align: center;
-      padding: 48px;
-      color: var(--muted);
-      font-size: 14px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 1000;
+    .step-time-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 20px;
-      border-radius: 12px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .step-note {
       font-size: 13px;
-      font-weight: 500;
-      border: 1px solid transparent;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-      max-width: 340px;
+      color: var(--text-sub);
+      line-height: 1.5;
     }
 
-    .toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-
-    .toast-success {
-      background: #0d2318;
-      border-color: rgba(0, 245, 212, 0.25);
-      color: var(--accent);
+    /* --- SCREEN 4: MODERATOR DASHBOARD VIEW --- */
+    .mod-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+      min-height: 600px;
     }
 
-    .toast-error {
-      background: #1e0d0f;
-      border-color: rgba(244, 63, 94, 0.25);
-      color: var(--danger);
-    }
-
-    .toast svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      fill: none;
-      flex-shrink: 0;
-    }
-
-    /* FOOTER */
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 24px;
-      text-align: center;
+    .mod-sidebar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px 16px;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .mod-nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mod-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mod-nav-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .mod-nav-item.active {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .mod-user-profile {
+      padding: 16px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-flex {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: #ffffff;
+      font-weight: 700;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 24px;
+      font-size: 14px;
     }
 
-    .footer-text {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-    }
+    .user-name { font-size: 13px; font-weight: 700; color: #ffffff; }
+    .user-email { font-size: 11px; color: var(--text-muted); }
 
-    .footer-links {
-      display: flex;
-      gap: 16px;
-    }
-
-    .footer-links a {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      text-decoration: none;
-      letter-spacing: 0.5px;
+    .btn-logout-icon {
+      color: var(--text-muted);
+      cursor: pointer;
       transition: color 0.2s;
     }
 
-    .footer-links a:hover { color: var(--accent); }
+    .btn-logout-icon:hover { color: var(--rose); }
 
-    /* Tab hidden */
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
-
-    /* SPINNER */
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid rgba(3, 7, 18, 0.3);
-      border-top-color: #030712;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+    /* MOD MAIN AREA */
+    .mod-main-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Glitch effect on hover for logo */
-    @keyframes glitch {
-      0% { clip-path: inset(0 0 100% 0); }
-      20% { clip-path: inset(30% 0 50% 0); transform: translate(-2px, 2px); }
-      40% { clip-path: inset(60% 0 20% 0); transform: translate(2px, -2px); }
-      60% { clip-path: inset(10% 0 70% 0); transform: translate(0); }
-      100% { clip-path: inset(100% 0 0 0); }
+    .mod-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
     }
 
-    @media (max-width: 640px) {
-      .nav { gap: 12px; }
-      .pill-btn { padding: 7px 12px; font-size: 12px; }
-      .track-input-row { flex-direction: column; }
-      .card-body { padding: 20px; }
+    .mod-page-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .mod-page-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .mod-filter-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .mod-search-input {
+      flex: 1;
+    }
+
+    /* DATA TABLE */
+    .reports-table-container {
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .reports-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .reports-table th {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 14px 18px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .reports-table td {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-sub);
+    }
+
+    .reports-table tr:last-child td { border-bottom: none; }
+    .reports-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .td-case-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--coral);
+    }
+
+    .btn-action-view {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-action-view:hover { text-decoration: underline; }
+
+    /* MODERATOR LOGIN CARD */
+    .mod-login-card {
+      max-width: 440px;
+      margin: 40px auto 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-popup {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 14px 20px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-popup.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-popup.toast-success { border-color: var(--emerald); color: var(--emerald); }
+    .toast-popup.toast-error { border-color: var(--rose); color: var(--rose); }
+
+    @media (max-width: 900px) {
+      .submit-grid, .track-grid, .mod-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      header { padding: 16px 20px; }
     }
   </style>
 </head>
-
 <body>
-  <div class="noise"></div>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <a class="logo" onclick="switchTab('submit')">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" stroke-width="1.5">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
+  <div class="ambient-glow"></div>
+  <div class="ambient-purple-glow"></div>
+
+  <!-- TOP HEADER NAV -->
+  <header>
+    <a class="brand" onclick="switchView('submit')">
+      <div class="brand-icon">
+        <i class="fa-solid fa-fire-flame-curved"></i>
       </div>
-      <div class="logo-text">
-        <span class="logo-name">WhistleDrop</span>
-        <span class="logo-tag">Anonymous Reports</span>
-      </div>
+      <span class="brand-name">WhistleDrop</span>
     </a>
 
-    <div class="pill-nav">
-      <button class="pill-btn active" id="tab-btn-submit" onclick="switchTab('submit')">
-        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Submit
-      </button>
-      <button class="pill-btn" id="tab-btn-track" onclick="switchTab('track')">
-        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Track
-      </button>
-      <button class="pill-btn" id="tab-btn-moderator" onclick="switchTab('moderator')">
-        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Moderator
-      </button>
-    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" id="tab-btn-submit" onclick="switchView('submit')">Report an Issue</button>
+      <button class="nav-tab" id="tab-btn-track" onclick="switchView('track')">Track a Case</button>
+      <a href="#" class="mod-portal-link" onclick="switchView('moderator')">Moderator Portal</a>
+    </nav>
+  </header>
 
-    <div class="nav-links">
-      <span class="status-dot">LIVE</span>
-      <a class="nav-link" href="/api-docs" target="_blank">API_DOCS</a>
-      <a class="nav-link" href="/health" target="_blank">HEALTH</a>
-    </div>
-  </nav>
+  <!-- MAIN CONTAINER -->
+  <main>
 
-  <!-- MAIN -->
-  <main class="main">
+    <!-- ================= VIEW 1: REPORT AN ISSUE (SCREEN 1 & 2) ================= -->
+    <div id="view-submit" class="view-pane active">
+      
+      <!-- SUBMIT FORM GRID (SCREEN 1) -->
+      <div id="submit-form-wrapper" class="submit-grid">
+        
+        <!-- Left Hero Text -->
+        <div class="hero-text">
+          <h1 class="hero-headline">A safer<br>tomorrow starts with <span>your voice.</span></h1>
+          <p class="hero-description">
+            WhistleDrop lets you report sensitive workplace issues anonymously and securely. No accounts. No tracking. Just real change.
+          </p>
 
-    <!-- HERO -->
-    <div class="hero">
-      <div class="hero-eyebrow">
-        <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        End-to-End Anonymous
-      </div>
-      <h1 class="hero-title">Speak Without<br><span>Being Seen</span></h1>
-      <p class="hero-sub">Submit confidential reports with zero identity exposure. No account. No IP tracking. No metadata.</p>
-    </div>
-
-    <!-- ===== TAB 1: SUBMIT ===== -->
-    <div class="tab-pane active" id="tab-submit">
-
-      <!-- FORM CARD -->
-      <div class="card" id="submit-form-card">
-        <div class="card-body">
-          <div class="section-label">Anonymous Report Submission</div>
-
-          <div class="privacy-banner">
-            <div class="privacy-icon">
-              <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div class="privacy-text">
-              <strong>Zero-Identity Protocol Active.</strong> Your IP address, device info, and session data are <strong>never recorded</strong>. Only the content you submit is stored.
-            </div>
-          </div>
-
-          <form id="submit-form" onsubmit="handleReportSubmit(event)">
-            <div class="field">
-              <label>Issue Category *</label>
-              <select id="report-category" required>
-                <option value="" disabled selected>Select category...</option>
-                <option value="Security">Security Vulnerability / Breach</option>
-                <option value="Harassment">Harassment or Discrimination</option>
-                <option value="Corruption">Financial Corruption or Fraud</option>
-                <option value="Technical">Technical Abuse or Misuse</option>
-                <option value="Other">Other Incident</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Detailed Description * <span style="color:var(--muted);text-transform:none;font-size:11px;font-weight:400;">(min 10 chars)</span></label>
-              <textarea id="report-description" required minlength="10" placeholder="Describe what happened, where, and when. Be as specific as possible..."></textarea>
-            </div>
-
-            <div class="field">
-              <label>Evidence / Reference URL <span style="color:var(--muted);text-transform:none;font-size:11px;font-weight:400;">optional</span></label>
-              <input type="url" id="report-evidence" placeholder="https://drive.google.com/... or https://pastebin.com/...">
-            </div>
-
-            <button type="submit" class="btn-primary" id="submit-btn">
-              <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>Submit Confidential Report</span>
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <!-- SUCCESS CARD -->
-      <div class="card" id="success-card" style="display:none;">
-        <div class="success-state" style="display:block;">
-          <div class="success-icon">
-            <svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <h2 style="font-size:22px;font-weight:700;color:white;margin-bottom:8px;">Report Submitted</h2>
-          <p style="font-size:14px;color:var(--muted);line-height:1.6;">Your report has been encrypted and logged anonymously. Save this case code — it's your only way to track updates.</p>
-
-          <div class="case-code-box">
-            <div class="case-code-label">Unique Case Code</div>
-            <div class="case-code-value" id="created-case-code">WD-XXXX-XXXX</div>
-            <button class="copy-btn" onclick="copyCaseCode()">
-              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              COPY CODE
-            </button>
-            <div>
-              <span class="warn-chip">
-                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                This code cannot be recovered if lost
-              </span>
-            </div>
-          </div>
-
-          <div class="success-actions">
-            <button class="btn-primary" onclick="trackCaseWithCode()">
-              <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              Track Status
-            </button>
-            <button class="btn-secondary" onclick="resetSubmitForm()">Submit Another</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== TAB 2: TRACK ===== -->
-    <div class="tab-pane" id="tab-track">
-      <div class="card">
-        <div class="card-body">
-          <div class="section-label">Case Status Lookup</div>
-          <form onsubmit="handleTrackSubmit(event)">
-            <div class="track-input-row">
-              <input class="mono-input" id="track-input" type="text" required placeholder="WD-XXXX-XXXX" autocomplete="off">
-              <button type="submit" class="btn-track">
-                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                TRACK
-              </button>
-            </div>
-          </form>
-
-          <!-- Results -->
-          <div class="timeline" id="track-result" style="display:none;">
-            <div class="report-header">
-              <div>
-                <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:2px;margin-bottom:4px;">CASE CODE</div>
-                <div class="report-code" id="result-case-code">WD-XXXX-XXXX</div>
-              </div>
-              <div class="report-meta">
-                <span class="chip chip-category" id="result-category">Security</span>
-                <span class="chip" id="result-status">SUBMITTED</span>
-              </div>
-            </div>
-            <div class="timeline-label">Investigation Timeline</div>
-            <div class="timeline-list" id="result-timeline"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== TAB 3: MODERATOR ===== -->
-    <div class="tab-pane" id="tab-moderator">
-
-      <!-- LOGIN -->
-      <div class="card" id="mod-login-card">
-        <div class="card-body">
-          <div class="mod-login-wrap">
-            <div class="mod-header">
-              <div class="shield-icon">
-                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-icon icon-coral">
+                <i class="fa-solid fa-user-ninja"></i>
               </div>
               <div>
-                <div style="font-size:18px;font-weight:700;color:white;">Moderator Access</div>
-                <div style="font-size:13px;color:var(--muted);">Restricted management portal</div>
+                <div class="feature-title">100% Anonymous</div>
+                <div class="feature-desc">No personal information, no IP tracking, no accounts.</div>
               </div>
             </div>
-            <form onsubmit="handleModLogin(event)">
-              <div class="field">
-                <label>Username</label>
-                <input type="text" id="mod-username" required placeholder="admin">
+
+            <div class="feature-item">
+              <div class="feature-icon icon-purple">
+                <i class="fa-solid fa-lock"></i>
               </div>
-              <div class="field">
-                <label>Password</label>
-                <input type="password" id="mod-password" required placeholder="••••••••">
+              <div>
+                <div class="feature-title">Secure & Encrypted</div>
+                <div class="feature-desc">Your report is protected with industry-standard security.</div>
               </div>
-              <button type="submit" class="btn-purple" id="mod-login-btn">
-                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                <span>Access Dashboard</span>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon icon-emerald">
+                <i class="fa-solid fa-seedling"></i>
+              </div>
+              <div>
+                <div class="feature-title">Make a Real Difference</div>
+                <div class="feature-desc">Help create a safer, more transparent organization.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Form Card -->
+        <div class="form-card">
+          <div class="card-header-tag">REPORT AN ISSUE</div>
+          <h2 class="card-title">Submit a Report</h2>
+          <p class="card-subtitle">Provide as much detail as possible. Do not include any personal information.</p>
+
+          <form id="report-form" onsubmit="handleReportSubmit(event)">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <select id="input-category" class="form-select has-icon" required>
+                  <option value="" disabled selected>Select a category</option>
+                  <option value="Security">Security Vulnerability / Data Leak</option>
+                  <option value="Harassment">Harassment or Inappropriate Behavior</option>
+                  <option value="Corruption">Financial Corruption or Misconduct</option>
+                  <option value="Technical">Unsafe Working Conditions / Technical</option>
+                  <option value="Other">Other Misuse of Company Resources</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Details</label>
+              <textarea id="input-description" class="form-textarea" required minlength="10" placeholder="Describe what happened..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Evidence / Reference URL (Optional)</label>
+              <input type="url" id="input-evidence" class="form-input" placeholder="https://example.com/evidence">
+            </div>
+
+            <button type="submit" id="btn-submit-report" class="btn-coral">
+              <span>Submit Report</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+            <div class="card-footer-privacy">
+              <i class="fa-solid fa-lock"></i>
+              <span>Your report is encrypted and completely anonymous.</span>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- SUCCESS OVERLAY CARD (SCREEN 2) -->
+      <div id="success-overlay" class="success-card">
+        <div class="success-badge-icon">
+          <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2 class="success-heading">Report Submitted <span>Successfully</span></h2>
+        <p class="success-subtext">
+          Your report has been received and assigned a unique case code.<br>Save this code — it is your only way to access this report.
+        </p>
+
+        <div class="case-code-container">
+          <div class="case-code-label">Your Case Code</div>
+          <div class="case-code-display">
+            <span id="display-case-code" class="case-code-text">WD-8K3P-9X2M</span>
+            <button class="btn-copy" onclick="copyCaseCode()" title="Copy Code">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <i class="fa-solid fa-circle-info info-box-icon"></i>
+          <div class="info-box-bullets">
+            &bull; Store this code in a safe place.<br>
+            &bull; You can use it to check the status of your report at any time.<br>
+            &bull; No account or personal information is required.
+          </div>
+        </div>
+
+        <button onclick="goToTrackingWithCode()" class="btn-emerald">
+          <span>Track Your Case</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= VIEW 2: TRACK A CASE (SCREEN 3) ================= -->
+    <div id="view-track" class="view-pane">
+      <div class="track-grid">
+        
+        <!-- Left Track Hero -->
+        <div class="hero-text">
+          <div class="card-header-tag" style="color:var(--purple);">TRACK YOUR CASE</div>
+          <h1 class="hero-headline hero-headline-purple">Stay Informed <span>Anonymously.</span></h1>
+          <p class="hero-description">
+            Enter your case code to view the current status and full timeline of your report.
+          </p>
+        </div>
+
+        <!-- Right Track Search & Timeline Card -->
+        <div>
+          <div class="form-card">
+            <div class="card-header-tag" style="color:var(--purple);">TRACK YOUR REPORT</div>
+            <h2 class="card-title">Track Your Report</h2>
+            
+            <form onsubmit="handleTrackSubmit(event)">
+              <div class="form-group" style="margin-top:20px;">
+                <label class="form-label">Case Code</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-magnifying-glass input-icon" style="color:var(--purple);"></i>
+                  <input type="text" id="track-case-code-input" class="form-input has-icon" required placeholder="WD-XXXX-XXXX" style="font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;">
+                </div>
+              </div>
+
+              <button type="submit" class="btn-purple">
+                <span>View Report</span>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
             </form>
           </div>
-        </div>
-      </div>
 
-      <!-- DASHBOARD -->
-      <div id="mod-dashboard" style="display:none;">
-        <div class="mod-top-bar">
-          <div class="mod-user-info">
-            <div class="mod-avatar" id="mod-avatar-initials">MD</div>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:white;" id="mod-welcome">Moderator</div>
-              <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);">MANAGEMENT PORTAL</div>
+          <!-- Timeline Results Card -->
+          <div id="track-result-card" class="timeline-card">
+            <div class="timeline-header">
+              <div>
+                <div id="result-case-id" class="timeline-case-title">Case WD-8K3P-9X2M</div>
+                <div id="result-case-subdate" class="timeline-case-date">Submitted on Apr 12, 2025</div>
+              </div>
+              <span id="result-badge" class="badge badge-RESOLVED">RESOLVED</span>
+            </div>
+
+            <div class="timeline-flow" id="result-timeline-steps">
+              <!-- Dynamic Timeline Steps -->
             </div>
           </div>
-          <button class="btn-logout" onclick="handleModLogout()">LOGOUT</button>
+
         </div>
 
-        <div class="filter-bar">
-          <select id="filter-category" onchange="loadModeratorReports()">
-            <option value="">All Categories</option>
-            <option value="Security">Security</option>
-            <option value="Harassment">Harassment</option>
-            <option value="Corruption">Corruption</option>
-            <option value="Technical">Technical</option>
-            <option value="Other">Other</option>
-          </select>
-          <select id="filter-status" onchange="loadModeratorReports()">
-            <option value="">All Statuses</option>
-            <option value="SUBMITTED">SUBMITTED</option>
-            <option value="UNDER_REVIEW">UNDER_REVIEW</option>
-            <option value="RESOLVED">RESOLVED</option>
-            <option value="DISMISSED">DISMISSED</option>
-          </select>
-        </div>
-
-        <div id="mod-reports-list"></div>
       </div>
+    </div>
+
+    <!-- ================= VIEW 3: MODERATOR PORTAL (SCREEN 4) ================= -->
+    <div id="view-moderator" class="view-pane">
+      
+      <!-- Moderator Login Form -->
+      <div id="mod-login-wrapper" class="mod-login-card">
+        <div class="card-header-tag" style="color:var(--purple);text-align:center;">MODERATOR ACCESS</div>
+        <h2 class="card-title" style="text-align:center;margin-bottom:24px;">Login to Portal</h2>
+        
+        <form onsubmit="handleModLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="mod-user-input" class="form-input" required value="admin">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="mod-pass-input" class="form-input" required value="adminpassword123">
+          </div>
+          <button type="submit" class="btn-purple">Login</button>
+        </form>
+      </div>
+
+      <!-- Moderator Dashboard (Screen 4 Layout) -->
+      <div id="mod-dashboard-wrapper" class="mod-layout" style="display:none;">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="mod-sidebar">
+          <div class="mod-nav-group">
+            <div class="brand" style="margin-bottom:24px;">
+              <div class="brand-icon">
+                <i class="fa-solid fa-fire-flame-curved"></i>
+              </div>
+              <span class="brand-name" style="font-size:16px;">WhistleDrop</span>
+            </div>
+
+            <a class="mod-nav-item active"><i class="fa-solid fa-folder-open"></i> Reports</a>
+            <a class="mod-nav-item"><i class="fa-solid fa-pen-to-square"></i> Create Note</a>
+            <a class="mod-nav-item"><i class="fa-solid fa-users"></i> Users</a>
+            <a href="/api-docs" target="_blank" class="mod-nav-item"><i class="fa-solid fa-code"></i> API Documentation</a>
+          </div>
+
+          <div class="mod-user-profile">
+            <div class="user-info-flex">
+              <div class="user-avatar">M</div>
+              <div>
+                <div class="user-name">Moderator</div>
+                <div class="user-email">admin@whistledrop.com</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-right-from-bracket btn-logout-icon" onclick="handleModLogout()" title="Log Out"></i>
+          </div>
+        </aside>
+
+        <!-- Main Content Panel -->
+        <section class="mod-main-content">
+          <div class="mod-header-row">
+            <div>
+              <h2 class="mod-page-title">Reports</h2>
+              <p class="mod-page-sub">Review and manage all submitted reports.</p>
+            </div>
+          </div>
+
+          <div class="mod-filter-row">
+            <input type="text" placeholder="Search case code or title..." class="form-input mod-search-input">
+            <select id="mod-filter-cat" onchange="fetchModReports()" class="form-select" style="width:160px;">
+              <option value="">All Categories</option>
+              <option value="Security">Security</option>
+              <option value="Harassment">Harassment</option>
+              <option value="Corruption">Corruption</option>
+              <option value="Technical">Technical</option>
+              <option value="Other">Other</option>
+            </select>
+            <select id="mod-filter-stat" onchange="fetchModReports()" class="form-select" style="width:160px;">
+              <option value="">All Statuses</option>
+              <option value="SUBMITTED">SUBMITTED</option>
+              <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="DISMISSED">DISMISSED</option>
+            </select>
+          </div>
+
+          <!-- Reports Data Table -->
+          <div class="reports-table-container">
+            <table class="reports-table">
+              <thead>
+                <tr>
+                  <th>Case Code</th>
+                  <th>Title / Snippet</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="mod-table-body">
+                <!-- Dynamic Moderator Rows -->
+              </tbody>
+            </table>
+          </div>
+
+        </section>
+
+      </div>
+
     </div>
 
   </main>
 
-  <!-- FOOTER -->
-  <footer>
-    <span class="footer-text">WHISTLEDROP v1.0 — CONFIDENTIAL REPORTING SYSTEM</span>
-    <div class="footer-links">
-      <a href="/api-docs" target="_blank">API_DOCS</a>
-      <a href="/health" target="_blank">HEALTH_CHECK</a>
-    </div>
-  </footer>
-
-  <!-- TOAST -->
-  <div class="toast" id="toast">
-    <svg id="toast-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-    <span id="toast-message">OK</span>
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast-popup">
+    <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+    <span id="toast-msg">Action completed successfully</span>
   </div>
 
   <script>
-    let currentToken = localStorage.getItem('modToken') || '';
+    let activeToken = localStorage.getItem('whistleToken') || '';
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toast');
       const icon = document.getElementById('toast-icon');
-      const text = document.getElementById('toast-message');
-      toast.classList.remove('toast-success', 'toast-error', 'show');
-      icon.innerHTML = isError
-        ? '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'
-        : '<polyline points="20 6 9 17 4 12"/>';
-      toast.classList.add(isError ? 'toast-error' : 'toast-success');
+      const text = document.getElementById('toast-msg');
+
       text.innerText = msg;
-      void toast.offsetWidth;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3500);
+      toast.className = `toast-popup visible ${isError ? 'toast-error' : 'toast-success'}`;
+      icon.className = isError ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-circle-check';
+
+      setTimeout(() => {
+        toast.className = 'toast-popup';
+      }, 3500);
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`tab-${tab}`).classList.add('active');
-      document.getElementById(`tab-btn-${tab}`).classList.add('active');
-      if (tab === 'moderator' && currentToken) {
-        document.getElementById('mod-login-card').style.display = 'none';
-        document.getElementById('mod-dashboard').style.display = 'block';
-        loadModeratorReports();
+    function switchView(view) {
+      document.querySelectorAll('.view-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+      document.getElementById(`view-${view}`).classList.add('active');
+      const tabBtn = document.getElementById(`tab-btn-${view}`);
+      if (tabBtn) tabBtn.classList.add('active');
+
+      if (view === 'moderator' && activeToken) {
+        document.getElementById('mod-login-wrapper').style.display = 'none';
+        document.getElementById('mod-dashboard-wrapper').style.display = 'grid';
+        fetchModReports();
       }
     }
 
-    // === SUBMIT ===
+    // === SUBMIT REPORT LOGIC ===
     async function handleReportSubmit(e) {
       e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner"></div><span>Encrypting...</span>';
+      const submitBtn = document.getElementById('btn-submit-report');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Submitting...</span>';
+
       try {
         const res = await fetch('/api/v1/reports', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            category: document.getElementById('report-category').value,
-            description: document.getElementById('report-description').value,
-            evidenceUrl: document.getElementById('report-evidence').value || undefined,
+            category: document.getElementById('input-category').value,
+            description: document.getElementById('input-description').value,
+            evidenceUrl: document.getElementById('input-evidence').value || undefined,
           }),
         });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Submission failed');
-        document.getElementById('created-case-code').innerText = data.data.caseCode;
-        document.getElementById('submit-form-card').style.display = 'none';
-        document.getElementById('success-card').style.display = 'block';
-        showToast('Report submitted successfully');
+
+        document.getElementById('display-case-code').innerText = data.data.caseCode;
+        document.getElementById('submit-form-wrapper').style.display = 'none';
+        document.getElementById('success-overlay').style.display = 'block';
+        showToast('Report submitted anonymously!');
       } catch (err) {
         showToast(err.message, true);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" width="18" height="18" stroke="currentColor" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Submit Confidential Report</span>';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Submit Report</span><i class="fa-solid fa-arrow-right"></i>';
       }
     }
 
     function copyCaseCode() {
-      const code = document.getElementById('created-case-code').innerText;
-      navigator.clipboard.writeText(code).then(() => showToast('Case code copied!'));
+      const code = document.getElementById('display-case-code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast('Case code copied to clipboard!');
+      });
     }
 
-    function trackCaseWithCode() {
-      const code = document.getElementById('created-case-code').innerText;
-      document.getElementById('track-input').value = code;
-      switchTab('track');
-      setTimeout(() => {
-        document.querySelector('#tab-track form').dispatchEvent(new Event('submit'));
-      }, 100);
+    function goToTrackingWithCode() {
+      const code = document.getElementById('display-case-code').innerText;
+      document.getElementById('track-case-code-input').value = code;
+      switchView('track');
+      document.getElementById('track-case-code-input').closest('form').dispatchEvent(new Event('submit'));
     }
 
-    function resetSubmitForm() {
-      document.getElementById('submit-form').reset();
-      document.getElementById('success-card').style.display = 'none';
-      document.getElementById('submit-form-card').style.display = 'block';
-    }
-
-    // === TRACK ===
+    // === TRACK CASE LOGIC ===
     async function handleTrackSubmit(e) {
       e.preventDefault();
-      const code = document.getElementById('track-input').value.trim();
+      const code = document.getElementById('track-case-code-input').value.trim();
+
       try {
         const res = await fetch(`/api/v1/reports/track/${encodeURIComponent(code)}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Case code not found');
-        const r = data.data;
-        document.getElementById('result-case-code').innerText = r.caseCode;
-        document.getElementById('result-category').innerText = r.category;
-        const statusEl = document.getElementById('result-status');
-        statusEl.innerText = r.status;
-        statusEl.className = `chip chip-${r.status}`;
-        document.getElementById('result-timeline').innerHTML = r.statusUpdates.map((u, i, arr) => `
-          <div class="tl-item">
-            <div class="tl-card">
-              <div class="tl-top">
-                <span class="tl-status">${u.newStatus}</span>
-                <span class="tl-time">${new Date(u.createdAt).toLocaleString()}</span>
-              </div>
-              <div class="tl-note">${u.note}</div>
+        if (!res.ok) throw new Error(data.error || 'Invalid case code');
+
+        const report = data.data;
+        document.getElementById('result-case-id').innerText = `Case ${report.caseCode}`;
+        document.getElementById('result-case-subdate').innerText = `Submitted on ${new Date(report.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+        const badge = document.getElementById('result-badge');
+        badge.innerText = report.status;
+        badge.className = `badge badge-${report.status}`;
+
+        const stepsContainer = document.getElementById('result-timeline-steps');
+        stepsContainer.innerHTML = report.statusUpdates.map((u, i) => `
+          <div class="timeline-step ${i === report.statusUpdates.length - 1 ? 'completed' : ''}">
+            <div class="step-node"></div>
+            <div class="step-time-header">
+              <span>${new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <span>${new Date(u.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
+            <div class="step-title">${u.newStatus.replace('_', ' ')}</div>
+            <div class="step-note">${u.note}</div>
           </div>
         `).join('');
-        document.getElementById('track-result').style.display = 'block';
+
+        document.getElementById('track-result-card').style.display = 'block';
       } catch (err) {
-        document.getElementById('track-result').style.display = 'none';
+        document.getElementById('track-result-card').style.display = 'none';
         showToast(err.message, true);
       }
     }
 
-    // === MODERATOR ===
+    // === MODERATOR LOGIC ===
     async function handleModLogin(e) {
       e.preventDefault();
-      const btn = document.getElementById('mod-login-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner" style="border-color:rgba(255,255,255,0.2);border-top-color:white;"></div><span>Authenticating...</span>';
       try {
         const res = await fetch('/api/v1/moderators/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: document.getElementById('mod-username').value,
-            password: document.getElementById('mod-password').value,
+            username: document.getElementById('mod-user-input').value,
+            password: document.getElementById('mod-pass-input').value,
           }),
         });
+
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Login failed');
-        currentToken = data.data.token;
-        localStorage.setItem('modToken', currentToken);
-        const username = data.data.username;
-        document.getElementById('mod-welcome').innerText = username;
-        document.getElementById('mod-avatar-initials').innerText = username.slice(0, 2).toUpperCase();
-        document.getElementById('mod-login-card').style.display = 'none';
-        document.getElementById('mod-dashboard').style.display = 'block';
-        loadModeratorReports();
-        showToast('Dashboard access granted');
+        if (!res.ok) throw new Error(data.error || 'Authentication failed');
+
+        activeToken = data.data.token;
+        localStorage.setItem('whistleToken', activeToken);
+
+        document.getElementById('mod-login-wrapper').style.display = 'none';
+        document.getElementById('mod-dashboard-wrapper').style.display = 'grid';
+        fetchModReports();
+        showToast('Logged into Moderator Portal');
       } catch (err) {
         showToast(err.message, true);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" width="18" height="18" stroke="white" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg><span>Access Dashboard</span>';
       }
     }
 
     function handleModLogout() {
-      currentToken = '';
-      localStorage.removeItem('modToken');
-      document.getElementById('mod-dashboard').style.display = 'none';
-      document.getElementById('mod-login-card').style.display = 'block';
+      activeToken = '';
+      localStorage.removeItem('whistleToken');
+      document.getElementById('mod-dashboard-wrapper').style.display = 'none';
+      document.getElementById('mod-login-wrapper').style.display = 'block';
       showToast('Logged out');
     }
 
-    async function loadModeratorReports() {
-      if (!currentToken) return;
-      const cat = document.getElementById('filter-category').value;
-      const stat = document.getElementById('filter-status').value;
+    async function fetchModReports() {
+      if (!activeToken) return;
+      const cat = document.getElementById('mod-filter-cat').value;
+      const stat = document.getElementById('mod-filter-stat').value;
+
       let url = '/api/v1/moderators/reports?';
       if (cat) url += `category=${encodeURIComponent(cat)}&`;
       if (stat) url += `status=${encodeURIComponent(stat)}`;
+
       try {
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${currentToken}` } });
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${activeToken}` }
+        });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load reports');
-        const container = document.getElementById('mod-reports-list');
+
+        const tbody = document.getElementById('mod-table-body');
         if (data.data.length === 0) {
-          container.innerHTML = '<div class="empty-state">// NO REPORTS FOUND</div>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px;">No reports found.</td></tr>';
           return;
         }
-        container.innerHTML = data.data.map(r => `
-          <div class="mod-card">
-            <div class="mod-card-header">
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span class="mod-card-code">${r.caseCode}</span>
-                <span class="chip chip-category">${r.category}</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span class="chip chip-${r.status}">${r.status}</span>
-                ${r.isClosed ? '<span class="closed-badge">CLOSED</span>' : ''}
-              </div>
-            </div>
-            <div class="mod-card-body">
-              <p class="mod-card-desc">${r.description}</p>
-              ${r.evidenceUrl ? `<a class="evidence-link" href="${r.evidenceUrl}" target="_blank"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Evidence Link</a>` : ''}
-              ${!r.isClosed ? `
-                <div class="update-controls">
-                  <select id="status-select-${r.id}">
-                    <option value="UNDER_REVIEW">UNDER_REVIEW</option>
-                    <option value="RESOLVED">RESOLVED</option>
-                    <option value="DISMISSED">DISMISSED</option>
-                  </select>
-                  <input type="text" id="note-input-${r.id}" placeholder="Add moderator note...">
-                  <button class="btn-update" onclick="updateStatus('${r.id}')">UPDATE</button>
-                  <button class="btn-close-case" onclick="closeCase('${r.id}')">CLOSE CASE</button>
-                </div>` : ''}
-            </div>
-          </div>
+
+        tbody.innerHTML = data.data.map(r => `
+          <tr>
+            <td class="td-case-code">${r.caseCode}</td>
+            <td>${r.description.slice(0, 40)}...</td>
+            <td>${r.category}</td>
+            <td><span class="badge badge-${r.status}">${r.status}</span></td>
+            <td>${new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+            <td>
+              <select onchange="updateReportStatus('${r.id}', this.value)" style="background:var(--input-bg);color:var(--text-main);border:1px solid var(--card-border);padding:4px 8px;border-radius:6px;font-size:11px;">
+                <option value="" disabled selected>Update Status</option>
+                <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                <option value="RESOLVED">RESOLVED</option>
+                <option value="DISMISSED">DISMISSED</option>
+              </select>
+            </td>
+          </tr>
         `).join('');
       } catch (err) {
         showToast(err.message, true);
       }
     }
 
-    async function updateStatus(id) {
-      const status = document.getElementById(`status-select-${id}`).value;
-      const note = document.getElementById(`note-input-${id}`).value.trim();
-      if (!note) { showToast('Please enter a moderator note', true); return; }
+    async function updateReportStatus(id, newStatus) {
+      const note = prompt(`Enter moderator note for updating status to ${newStatus}:`, `Status updated to ${newStatus}`);
+      if (!note) return;
+
       try {
         const res = await fetch(`/api/v1/moderators/reports/${id}/status`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` },
-          body: JSON.stringify({ status, note }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${activeToken}`
+          },
+          body: JSON.stringify({ status: newStatus, note }),
         });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Update failed');
-        showToast(`Status updated to ${status}`);
-        loadModeratorReports();
-      } catch (err) {
-        showToast(err.message, true);
-      }
-    }
 
-    async function closeCase(id) {
-      if (!confirm('Permanently close this case? This cannot be undone.')) return;
-      try {
-        const res = await fetch(`/api/v1/moderators/reports/${id}/close`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${currentToken}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to close case');
-        showToast('Case permanently closed');
-        loadModeratorReports();
+        showToast(`Status updated to ${newStatus}`);
+        fetchModReports();
       } catch (err) {
         showToast(err.message, true);
       }
